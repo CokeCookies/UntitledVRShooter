@@ -34,7 +34,7 @@ public class CharacterControls : MonoBehaviour
     private void Input()
     {
         Color colour = Color.green;
-        if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
+        if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
         {
             colour = Color.red;
             audioSource.Play();
