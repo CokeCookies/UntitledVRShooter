@@ -63,6 +63,9 @@ public class EnemyAI : MonoBehaviour
 
         //Disable colliders (for body and head) and set a timer for self-destruction
         StartCoroutine(DestroySelfTimer());
+
+        //Report back to the SpawnController that you need to be removed from Enemies list
+
         //Enemy falls and disappears
         //Deleted from scene
 
