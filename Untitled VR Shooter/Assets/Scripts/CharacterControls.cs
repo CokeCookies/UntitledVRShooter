@@ -5,17 +5,20 @@ using UnityEngine;
 public class CharacterControls : MonoBehaviour
 {
     [SerializeField]
-    private float playerHealth = 5;
+    private int playerHealth = 5;
+    
 
     [SerializeField] 
     private AudioClip clip;
-    [SerializeField]
     private AudioSource audioSource;
     [SerializeField]
     private Transform gunBarrelTransform;
 
+    private HealthBar healthBar;
+
     private void Start()
     {
+        healthBar.SetMaxHealth(playerHealth);
         audioSource = GetComponent<AudioSource>();
         audioSource.clip = clip;
     }
@@ -27,11 +30,14 @@ public class CharacterControls : MonoBehaviour
 
     private void Input()
     {
+        Color colour = new Vector4(0, 0, 1, 1);
         if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
         {
+            colour = new Vector4(1, 0, 0, 1);
             audioSource.Play();
             RaycastFromGunBarrel();
         }
+        Debug.DrawRay(gunBarrelTransform.position, gunBarrelTransform.forward, colour);
     }
 
     private void RaycastFromGunBarrel()
@@ -50,9 +56,10 @@ public class CharacterControls : MonoBehaviour
         }
     }
 
-    public float PlayerTakeDamage(float damage)
+    public float PlayerTakeDamage(int damage)
     {
         playerHealth = playerHealth - damage;
+        healthBar.SetHealth(playerHealth);
         return playerHealth;
     }
 }
