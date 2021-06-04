@@ -7,20 +7,23 @@ public class CharacterControls : MonoBehaviour
     [SerializeField]
     private int playerHealth = 5;
     
-
     [SerializeField] 
     private AudioClip clip;
     private AudioSource audioSource;
     [SerializeField]
     private Transform gunBarrelTransform;
+    [SerializeField]
+    private LineRenderer lineRenderer;
 
     private HealthBar healthBar;
+    private Ray ray;
 
     private void Start()
     {
         healthBar.SetMaxHealth(playerHealth);
         audioSource = GetComponent<AudioSource>();
         audioSource.clip = clip;
+        lineRenderer = GetComponent<LineRenderer>();
     }
 
     private void Update()
@@ -30,21 +33,28 @@ public class CharacterControls : MonoBehaviour
 
     private void Input()
     {
-        Color colour = new Vector4(0, 0, 1, 1);
+        Color colour = Color.green;
         if (OVRInput.Get(OVRInput.Button.SecondaryHandTrigger))
         {
-            colour = new Vector4(1, 0, 0, 1);
+            colour = Color.red;
             audioSource.Play();
             RaycastFromGunBarrel();
         }
-        Debug.DrawRay(gunBarrelTransform.position, gunBarrelTransform.forward, colour);
+        ray = new Ray(gunBarrelTransform.position, gunBarrelTransform.forward);
+
+        lineRenderer.SetPosition(0, ray.origin);
+        lineRenderer.SetPosition(1, ray.origin + 100 * ray.direction);
+        lineRenderer.material.color = colour;
+       // lineRenderer.SetColors(colour, colour);
+        //Debug.DrawRay(gunBarrelTransform.position, gunBarrelTransform.forward, colour);
     }
 
     private void RaycastFromGunBarrel()
     {
+        
         RaycastHit hit;
 
-        if (Physics.Raycast(gunBarrelTransform.position, gunBarrelTransform.forward, out hit))
+        if (Physics.Raycast(ray, out hit))
         {
             if (hit.collider.tag == "Enemy")
             {
@@ -54,6 +64,7 @@ public class CharacterControls : MonoBehaviour
                 Destroy(hit.collider.gameObject);
             }
         }
+
     }
 
     public float PlayerTakeDamage(int damage)
