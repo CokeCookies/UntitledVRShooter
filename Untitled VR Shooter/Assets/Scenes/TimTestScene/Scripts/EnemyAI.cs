@@ -7,7 +7,7 @@ using UnityEngine.AI;
 public class EnemyAI : MonoBehaviour
 {
     private NavMeshAgent enemyNavMeshAgent;
-    [SerializeField] private Transform player;
+    private GameObject player;
     [SerializeField] private int maxHealth;
     private int health;
     [SerializeField] private int baseDamage = 10;
@@ -27,7 +27,7 @@ public class EnemyAI : MonoBehaviour
         {
             //Pathfind to player
             //You really want to be pathfinding not directly to the player, but to a point on the edge of the melee zone (e.g. x distance from player position)
-            enemyNavMeshAgent.SetDestination(player.position);
+            enemyNavMeshAgent.SetDestination(player.transform.position);
 
             if (ColourChangeCooldown())
                 //Debug.Log("cooldown complete");
@@ -85,6 +85,7 @@ public class EnemyAI : MonoBehaviour
 
     void Awake()
     {
+        player = GameObject.FindWithTag("Player");
         enemyNavMeshAgent = GetComponent<NavMeshAgent>();
         state = State.Pathfinding;
         StartCoroutine(PathfindingState());
