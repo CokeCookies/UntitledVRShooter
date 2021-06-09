@@ -282,6 +282,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerHealth: 5
+  timeBetweenShots: 1
   clip: {fileID: 8300000, guid: 494bd1721199a40c5a79fa3011793556, type: 3}
   gunBarrelTransform: {fileID: 268898321}
   lineRenderer: {fileID: 1961827716}
@@ -408,7 +409,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: e0f1914fdbfd3764faeff5474c0cbe1e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: e0f1914fdbfd3764faeff5474c0cbe1e, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1033,7 +1034,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca1e8206c97ccf244a9c8b37afd3b042, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slider: {fileID: 0}
+  slider: {fileID: 728541060}
 --- !u!114 &728541060
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1273,7 +1274,7 @@ GameObject:
   - component: {fileID: 1207409703}
   - component: {fileID: 1207409702}
   m_Layer: 0
-  m_Name: Gazelcon
+  m_Name: GazeIcon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1590,8 +1591,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rayTransform: {fileID: 1370639141}
-  m_Cursor: {fileID: 0}
-  joyPadClickButton: 8192
+  m_Cursor: {fileID: 1114040581}
+  joyPadClickButton: 0
   gazeClickKey: 32
   performSphereCastForGazepointer: 0
   useRightStickScroll: 1

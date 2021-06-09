@@ -6,7 +6,12 @@ public class CharacterControls : MonoBehaviour
 {
     [SerializeField]
     private int playerHealth = 5;
-    
+    [SerializeField]
+    private float timeBetweenShots = 1.0f;
+
+    private bool wasKeyDown = true;
+    private bool canShoot = true;
+
     [SerializeField] 
     private AudioClip clip;
     private AudioSource audioSource;
@@ -20,27 +25,44 @@ public class CharacterControls : MonoBehaviour
 
     private void Start()
     {
-        healthBar.SetMaxHealth(playerHealth);
+        
         audioSource = GetComponent<AudioSource>();
         audioSource.clip = clip;
-        lineRenderer = GetComponent<LineRenderer>();
+        
+        //healthBar.SetMaxHealth(playerHealth);
     }
 
     private void Update()
     {
-        Input();
+        InputHolder();
     }
 
-    private void Input()
+    private void InputHolder()
     {
+        ray = new Ray(gunBarrelTransform.position, gunBarrelTransform.forward);
         Color colour = Color.green;
-        if (OVRInput.Get(OVRInput.Button.PrimaryHandTrigger))
+
+        bool triggerDown = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger);
+       
+        
+        if (!wasKeyDown && triggerDown && canShoot)
         {
             colour = Color.red;
             audioSource.Play();
             RaycastFromGunBarrel();
+            canShoot = false;
+            StartCoroutine(TimeBetweenShots(timeBetweenShots));
         }
-        ray = new Ray(gunBarrelTransform.position, gunBarrelTransform.forward);
+        wasKeyDown = triggerDown;
+        
+        //if (Input.GetMouseButton(0))
+        //{
+        //    colour = Color.red;
+        //    audioSource.Play();
+        //    RaycastFromGunBarrel();
+        //}
+
+
 
         lineRenderer.SetPosition(0, ray.origin);
         lineRenderer.SetPosition(1, ray.origin + 100 * ray.direction);
@@ -72,5 +94,12 @@ public class CharacterControls : MonoBehaviour
         playerHealth = playerHealth - damage;
         healthBar.SetHealth(playerHealth);
         return playerHealth;
+    }
+
+    private IEnumerator TimeBetweenShots(float waitTime)
+    {
+
+        yield return new WaitForSeconds(waitTime);
+        canShoot = true;
     }
 }
