@@ -49,7 +49,7 @@ public class FireGun : MonoBehaviour
                 if (hit.collider.transform.CompareTag("EnemyHead"))
                 {
                     //Debug.Log("Shot enemy's head");
-                    enemyAIScript = hit.transform.GetComponent<EnemyAI>();
+                    enemyAIScript = hit.transform.GetComponentInParent<EnemyAI>();
                     enemyAIScript.TakeDamageHeadshot();
                 }
                 else if (hit.transform.CompareTag("Enemy"))

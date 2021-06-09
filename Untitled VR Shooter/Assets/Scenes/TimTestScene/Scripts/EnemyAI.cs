@@ -15,19 +15,24 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] Color defaultColour;
     private float colourCooldown = 0.2f;
     [SerializeField] private SphereCollider meleeAttackZone;
+    public GameObject currentRail;  //the rail that the enemy agent is currently using
+    public List<GameObject> railNodes;  //the nodes belonging to currentRail; there's no particularly good reason to do this in a list; the AI should just have an int counter, and upon reaching a node they should fetch the next one from the rail
+    public GameObject target;   // the node the AI is targeting
+    public int targetNumber = 0; //the number (in sequence) of the current target node
+
 
     private enum State { Pathfinding, Attacking, Dead };
     private State state;
 
     IEnumerator PathfindingState()
     {
-        Debug.Log("Enter: pathfinding state");
+        //Debug.Log("Enter: pathfinding state");
 
         while (state == State.Pathfinding)
         {
             //Pathfind to player
             //You really want to be pathfinding not directly to the player, but to a point on the edge of the melee zone (e.g. x distance from player position)
-            enemyNavMeshAgent.SetDestination(player.transform.position);
+            enemyNavMeshAgent.SetDestination(target.transform.position);
 
             if (ColourChangeCooldown())
                 //Debug.Log("cooldown complete");
@@ -36,12 +41,12 @@ public class EnemyAI : MonoBehaviour
             yield return 0;
         }
 
-        Debug.Log("Exit: pathfinding state");
+        //Debug.Log("Exit: pathfinding state");
     }
 
     IEnumerator AttackingState()
     {
-        Debug.Log("Enter: attacking state");
+        //Debug.Log("Enter: attacking state");
         enemyNavMeshAgent.isStopped = true;   //stop pathfinding
         transform.GetComponent<Rigidbody>().velocity = Vector3.zero;    //negate velocity
 
@@ -54,12 +59,12 @@ public class EnemyAI : MonoBehaviour
             yield return 0;
         }
 
-        Debug.Log("Exit: attacking state");
+        //Debug.Log("Exit: attacking state");
     }
 
     IEnumerator DeadState()
     {
-        Debug.Log("Enter: dead state");
+        //Debug.Log("Enter: dead state");
 
         //Disable colliders (for body and head) and set a timer for self-destruction
         StartCoroutine(DestroySelfTimer());
@@ -76,7 +81,7 @@ public class EnemyAI : MonoBehaviour
             yield return 0;
         }
 
-        Debug.Log("Exit: dead state");
+        //Debug.Log("Exit: dead state");
         //No need for an exit transition
     }
 
@@ -93,6 +98,14 @@ public class EnemyAI : MonoBehaviour
         state = State.Pathfinding;
         StartCoroutine(PathfindingState());
         meleeAttackZone = GetComponent<SphereCollider>();
+
+        for (int i = 0; i < currentRail.transform.childCount; i++)
+        {
+            GameObject child = currentRail.transform.GetChild(i).gameObject;
+            railNodes.Add(child);
+        }
+
+        target = railNodes[0];
     }
 
     // Update is called once per frame
@@ -170,10 +183,25 @@ public class EnemyAI : MonoBehaviour
     //Upon collision with the melee attack zone trigger, transition to attacking state
     private void OnTriggerEnter(Collider other)
     {
+        if(other.gameObject == target && other.gameObject != railNodes[railNodes.Count - 1])    //i.e. if the node isn't the lst one in the current nodes
+        {
+            Debug.Log("I've reched my target node!");
+            targetNumber++;
+            target = railNodes[targetNumber];
+        }
+
+        if (other.gameObject == target && other.gameObject == railNodes[railNodes.Count - 1])    //i.e. if the node isn't the lst one in the current nodes
+        {
+            Debug.Log("I've reched the end node. Time to teleport!");
+            targetNumber = 0;
+            //Teleport to rail
+        }
+
+
         //Debug.Log("Trigger!");
-        Debug.Log("attack zone!");
-        state = State.Attacking;
-        StartCoroutine(AttackingState());
+        //Debug.Log("attack zone!");
+        //state = State.Attacking;
+        //StartCoroutine(AttackingState());
 
         //THIS ISN'T OKAY
 
@@ -183,6 +211,6 @@ public class EnemyAI : MonoBehaviour
             Debug.Log("attack zone!");
             state = State.Attacking;
             StartCoroutine(AttackingState());
-        }    */ 
+        }    */
     }
 }
