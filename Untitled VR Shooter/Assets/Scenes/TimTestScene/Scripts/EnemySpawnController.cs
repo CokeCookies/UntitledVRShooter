@@ -14,6 +14,7 @@ public class EnemySpawnController : MonoBehaviour
 
     private List<GameObject> enemies;
     public List<GameObject> spawnZones;
+    public GameObject[] navigationRails;
 
     //Perhaps you can set up enemy type as a struct (taking in name, prefab). We'll only have one for this project, but it's nice to have expandability in mind
 
@@ -24,15 +25,20 @@ public class EnemySpawnController : MonoBehaviour
 
     void Start()
     {
+        /*
+        
         for (int i = 0; i < spawnZones.Count; i++)
         {
             Instantiate(enemyPrefab, spawnZones[i].transform.position, Quaternion.identity);        
         }
+
+        */
     }
 
     // Update is called once per frame
     void Update()
     {
+        /*
         if (EnemySpawnCooldown())
         {
             for (int i = 0; i < spawnZones.Count; i++)
@@ -43,6 +49,7 @@ public class EnemySpawnController : MonoBehaviour
 
             spawnCooldown = 5.0f;
         }
+        */
 
         //Re-order spawnzones based on angle to camera.forward delta
         //Do you really need to iterate through this list again? You certainly don't need to do this reordering each update.
@@ -64,5 +71,27 @@ public class EnemySpawnController : MonoBehaviour
     public void RemoveDeadEnemy(GameObject enemy)
     {
         enemies.Remove(enemy);
+    }
+
+    //Returns the next node rail (for when an agent reaches the last node of a rail)
+    public GameObject GetNextRail(GameObject currentRail)
+    {
+        //Cheap, quick, hacky, and temporary solution.
+        if (currentRail == navigationRails[0])
+        {
+            return navigationRails[1];
+        }
+
+        if (currentRail == navigationRails[1])
+        {
+            return navigationRails[2];
+        }
+
+        if (currentRail == navigationRails[2])
+        {
+            return navigationRails[0];
+        }
+
+        return null;
     }
 }

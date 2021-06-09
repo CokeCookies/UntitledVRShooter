@@ -16,9 +16,11 @@ public class EnemyAI : MonoBehaviour
     private float colourCooldown = 0.2f;
     [SerializeField] private SphereCollider meleeAttackZone;
     public GameObject currentRail;  //the rail that the enemy agent is currently using
+    public GameObject nextRail; //the next rail the agent will teleport to
     public List<GameObject> railNodes;  //the nodes belonging to currentRail; there's no particularly good reason to do this in a list; the AI should just have an int counter, and upon reaching a node they should fetch the next one from the rail
     public GameObject target;   // the node the AI is targeting
     public int targetNumber = 0; //the number (in sequence) of the current target node
+    public EnemySpawnController enemySpawnController;   //public for debugging (like everything else!)
 
 
     private enum State { Pathfinding, Attacking, Dead };
@@ -33,6 +35,7 @@ public class EnemyAI : MonoBehaviour
             //Pathfind to player
             //You really want to be pathfinding not directly to the player, but to a point on the edge of the melee zone (e.g. x distance from player position)
             enemyNavMeshAgent.SetDestination(target.transform.position);
+            Debug.DrawLine(transform.position, target.transform.position, Color.green);
 
             if (ColourChangeCooldown())
                 //Debug.Log("cooldown complete");
@@ -98,14 +101,10 @@ public class EnemyAI : MonoBehaviour
         state = State.Pathfinding;
         StartCoroutine(PathfindingState());
         meleeAttackZone = GetComponent<SphereCollider>();
+        enemySpawnController = GameObject.FindWithTag("SpawnController").GetComponent<EnemySpawnController>();   //get the scene's spawn controller
 
-        for (int i = 0; i < currentRail.transform.childCount; i++)
-        {
-            GameObject child = currentRail.transform.GetChild(i).gameObject;
-            railNodes.Add(child);
-        }
-
-        target = railNodes[0];
+        GetNodePath();
+        nextRail = enemySpawnController.GetNextRail(currentRail);
     }
 
     // Update is called once per frame
@@ -185,15 +184,16 @@ public class EnemyAI : MonoBehaviour
     {
         if(other.gameObject == target && other.gameObject != railNodes[railNodes.Count - 1])    //i.e. if the node isn't the lst one in the current nodes
         {
-            Debug.Log("I've reched my target node!");
+            Debug.Log("I've reched node " + targetNumber + ", my target node.");
             targetNumber++;
             target = railNodes[targetNumber];
         }
 
         if (other.gameObject == target && other.gameObject == railNodes[railNodes.Count - 1])    //i.e. if the node isn't the lst one in the current nodes
         {
-            Debug.Log("I've reched the end node. Time to teleport!");
+            Debug.Log("I've reached node " + targetNumber + ", the end node. Time to teleport!");
             targetNumber = 0;
+            StartCoroutine(TeleportTimer());
             //Teleport to rail
         }
 
@@ -212,5 +212,39 @@ public class EnemyAI : MonoBehaviour
             state = State.Attacking;
             StartCoroutine(AttackingState());
         }    */
+    }
+
+    void GetNodePath()
+    {
+        railNodes.Clear();
+
+        for (int i = 0; i < currentRail.transform.childCount; i++)
+        {
+            GameObject child = currentRail.transform.GetChild(i).gameObject;
+            railNodes.Add(child);
+        }
+
+        target = railNodes[0];
+    }
+
+    IEnumerator TeleportTimer()
+    {
+        yield return new WaitForSeconds(2);
+        TeleportToNextRail();
+    }
+
+    private void TeleportToNextRail()
+    {
+
+        GameObject teleportNode = nextRail.transform.GetChild(0).gameObject;    //the first node of thetarget rail
+        Vector3 targetPosition = new Vector3();
+        targetPosition.x = teleportNode.transform.position.x;
+        targetPosition.y = teleportNode.transform.position.y;
+        targetPosition.z = teleportNode.transform.position.z;
+        enemyNavMeshAgent.Warp(targetPosition);
+
+        currentRail = nextRail;
+        GetNodePath();
+        nextRail = enemySpawnController.GetNextRail(currentRail);
     }
 }
